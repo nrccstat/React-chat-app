@@ -196,28 +196,17 @@ const MessageInput = ({ addMessage, triggerFriendResponse }) => {
 
 // Main App Component with Enhanced Chat Logic
 const App = () => {
-  const [messages, setMessages] = useState(() => {
-    const savedMessages = localStorage.getItem('messages');
-    return savedMessages
-      ? JSON.parse(savedMessages)
-      : [
-          { id: 1, sender: 'Alice', text: 'Hi, I’m Alice! Here to chat and help. How’s your day going?', timestamp: '10:00 AM' },
-        ];
-  });
+  const initialMessages = [
+    { id: 1, sender: 'Alice', text: 'Hi, I’m Alice! Here to chat and help. How’s your day going?', timestamp: '10:00 AM' }
+  ];
+  
+  const [messages, setMessages] = useState(initialMessages);
   const [conversationState, setConversationState] = useState('greeting');
   const [isTyping, setIsTyping] = useState(false);
 
-  // Save messages to localStorage whenever they change
-  useEffect(() => {
-    localStorage.setItem('messages', JSON.stringify(messages));
-  }, [messages]);
-
   // Add a new message to the chat
   const addMessage = (sender, text, timestamp) => {
-    setMessages(prev => [
-      ...prev,
-      { id: Date.now(), sender, text, timestamp },
-    ]);
+    setMessages(prev => [...prev, { id: Date.now(), sender, text, timestamp }]);
   };
 
   // Determine chatbot response based on user input and current state
@@ -244,7 +233,6 @@ const App = () => {
       response = 'That sounds interesting! What else is on your mind?';
       nextState = 'general_chat';
     } else {
-      // General chat state with extended responses
       if (lowerMessage.includes('weather')) {
         response = 'It’s sunny and 75°F here! How’s the weather where you are?';
       } else if (lowerMessage.includes('how are you') || lowerMessage.includes('how you doing')) {
@@ -294,11 +282,10 @@ const App = () => {
     setConversationState(nextState);
     const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     setIsTyping(true);
-    const delay = Math.random() * 1500 + 500; // Random delay between 0.5-2 seconds
     setTimeout(() => {
       addMessage('Alice', response, timestamp);
       setIsTyping(false);
-    }, delay);
+    }, Math.random() * 1500 + 500);
   };
 
   return (
