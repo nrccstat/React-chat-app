@@ -1,8 +1,4 @@
-Below is an in-depth README file for your project. You can save this as `README.md` in your project root.
 
----
-
-```markdown
 # Chatbot with React and styled-components
 
 A simple yet interactive chatbot application built with React and styled-components. This project implements a conversational interface where a chatbot named **Alice** interacts with users through a variety of prompts, based on a stateful response system. The chatbot is designed to simulate natural conversation, offering responses for topics such as weather, mood, jokes, facts, music, movies, and more.
