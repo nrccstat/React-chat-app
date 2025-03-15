@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
-// Styled Components for Layout and Styling
 const AppContainer = styled.div`
   display: flex;
   height: 100vh;
@@ -131,7 +130,6 @@ const SendButton = styled.button`
   }
 `;
 
-// Message Component
 const Message = ({ sender, text, timestamp }) => (
   <MessageWrapper sender={sender}>
     <MessageBubble sender={sender}>{text}</MessageBubble>
@@ -139,7 +137,6 @@ const Message = ({ sender, text, timestamp }) => (
   </MessageWrapper>
 );
 
-// ChatArea Component with Auto-Scroll
 const ChatAreaComponent = ({ messages, isTyping }) => {
   const chatEndRef = useRef(null);
 
@@ -167,7 +164,6 @@ const ChatAreaComponent = ({ messages, isTyping }) => {
   );
 };
 
-// MessageInput Component
 const MessageInput = ({ addMessage, triggerFriendResponse }) => {
   const [text, setText] = useState('');
 
@@ -194,7 +190,6 @@ const MessageInput = ({ addMessage, triggerFriendResponse }) => {
   );
 };
 
-// Main App Component with Enhanced Chat Logic
 const App = () => {
   const initialMessages = [
     { id: 1, sender: 'Alice', text: 'Hi, I’m Alice! Here to chat and help. How’s your day going?', timestamp: '10:00 AM' }
@@ -204,12 +199,10 @@ const App = () => {
   const [conversationState, setConversationState] = useState('greeting');
   const [isTyping, setIsTyping] = useState(false);
 
-  // Add a new message to the chat
   const addMessage = (sender, text, timestamp) => {
     setMessages(prev => [...prev, { id: Date.now(), sender, text, timestamp }]);
   };
 
-  // Determine chatbot response based on user input and current state
   const getResponse = (userMessage, currentState) => {
     const lowerMessage = userMessage.toLowerCase();
     let response = '';
@@ -276,7 +269,6 @@ const App = () => {
     return { response, nextState };
   };
 
-  // Trigger chatbot response with a typing delay
   const triggerFriendResponse = (userMessage) => {
     const { response, nextState } = getResponse(userMessage, conversationState);
     setConversationState(nextState);
