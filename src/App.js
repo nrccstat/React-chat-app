@@ -1,5 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
+import nlp from 'compromise';
+import nlpNumbers from 'compromise-numbers';
+import nlpDates from 'compromise-dates';
+nlp.extend(nlpNumbers);
+nlp.extend(nlpDates);
+
+const trainingData = [
+  { keywords: ['happy', 'joy', 'excited', 'great'], response: "I'm glad you're feeling positive! What's making you feel this way?" },
+  { keywords: ['sad', 'upset', 'angry', 'frustrated'], response: "I'm sorry you're feeling down. Would you like to talk about what's bothering you?" },
+  { keywords: ['work', 'job', 'career', 'business'], response: "Work can be challenging. How's your professional life going?" },
+  { keywords: ['family', 'parents', 'siblings', 'relatives'], response: "Family relationships are important. How are things with your family?" },
+  { keywords: ['friend', 'friends', 'social', 'hangout'], response: "Friends make life better! How's your social life?" },
+  { keywords: ['health', 'exercise', 'fitness', 'diet'], response: "Taking care of your health is crucial. How's your wellness journey?" },
+  { keywords: ['study', 'learn', 'education', 'school'], response: "Learning is a lifelong journey. What are you studying or interested in?" },
+  { keywords: ['hobby', 'interest', 'passion', 'fun'], response: "Having hobbies is great! What do you enjoy doing in your free time?" }
+];
 
 const AppContainer = styled.div`
   display: flex;
@@ -192,15 +208,68 @@ const MessageInput = ({ addMessage, triggerFriendResponse }) => {
 
 const App = () => {
   const initialMessages = [
-    { id: 1, sender: 'Alice', text: 'Hi, I’m Alice! Here to chat and help. How’s your day going?', timestamp: '10:00 AM' }
+    { id: 1, sender: 'Alice', text: "Hi, I'm Alice! I'm here to chat and help. How are you feeling today?", timestamp: '10:00 AM' }
   ];
   
   const [messages, setMessages] = useState(initialMessages);
   const [conversationState, setConversationState] = useState('greeting');
   const [isTyping, setIsTyping] = useState(false);
+  const [lastTopic, setLastTopic] = useState(null);
 
   const addMessage = (sender, text, timestamp) => {
     setMessages(prev => [...prev, { id: Date.now(), sender, text, timestamp }]);
+  };
+
+  const analyzeMessage = (message, history) => {
+    const doc = nlp(message);
+    const lower = message.toLowerCase();
+
+    // Entity recognition
+    if (doc.people().length) {
+      return `You mentioned ${doc.people().out('text')}. Are they important to you?`;
+    }
+    if (doc.places().length) {
+      return `I've heard of ${doc.places().out('text')}. Have you been there recently?`;
+    }
+    if (doc.dates().length) {
+      return `You mentioned a date: ${doc.dates().out('text')}. Is something special happening then?`;
+    }
+    if (doc.organizations().length) {
+      return `You mentioned ${doc.organizations().out('text')}. Do you work with them?`;
+    }
+    if (doc.numbers().length) {
+      return `You mentioned the number ${doc.numbers().out('text')}. Does it have any special meaning?`;
+    }
+
+    // Question detection
+    if (doc.has('#Question') || message.trim().endsWith('?')) {
+      return "That's a great question! What do you think?";
+    }
+
+    // Sentiment cues
+    if (doc.has('happy') || doc.has('excited') || doc.has('love')) {
+      return "I'm glad to hear that! What made you feel this way?";
+    }
+    if (doc.has('sad') || doc.has('angry') || doc.has('upset')) {
+      return "I'm sorry to hear that. Want to talk about it?";
+    }
+
+    // Topic extraction (noun detection)
+    const nouns = doc.nouns().out('array');
+    if (nouns.length) {
+      return `Let's talk about ${nouns[0]}. What interests you about it?`;
+    }
+
+    // Pattern matching (custom intent)
+    if (doc.match('tell me a joke').found) {
+      return "Why don't scientists trust atoms? Because they make up everything!";
+    }
+    if (doc.match('fun fact').found) {
+      return "Did you know? Octopuses have three hearts!";
+    }
+
+    // Fallback
+    return "I'm here to chat about anything! Tell me more or ask me something specific.";
   };
 
   const getResponse = (userMessage, currentState) => {
@@ -209,60 +278,10 @@ const App = () => {
     let nextState = currentState;
 
     if (currentState === 'greeting') {
-      if (lowerMessage.includes('good') || lowerMessage.includes('great') || lowerMessage.includes('fine')) {
-        response = 'That’s awesome! What made your day good?';
-        nextState = 'asking_about_day';
-      } else if (lowerMessage.includes('bad') || lowerMessage.includes('not good')) {
-        response = 'Oh no, I’m sorry to hear that. What happened?';
-        nextState = 'asking_about_day';
-      } else if (lowerMessage.includes('how') && lowerMessage.includes('you')) {
-        response = 'I’m doing great, thanks for asking! How about you?';
-        nextState = 'general_chat';
-      } else {
-        response = 'Not sure what you mean. Want to tell me more?';
-        nextState = 'general_chat';
-      }
-    } else if (currentState === 'asking_about_day') {
-      response = 'That sounds interesting! What else is on your mind?';
+      response = analyzeMessage(userMessage, messages);
       nextState = 'general_chat';
     } else {
-      if (lowerMessage.includes('weather')) {
-        response = 'It’s sunny and 75°F here! How’s the weather where you are?';
-      } else if (lowerMessage.includes('how are you') || lowerMessage.includes('how you doing')) {
-        response = 'I’m doing awesome, thanks! How about you?';
-      } else if (lowerMessage.includes('day') || lowerMessage.includes('today')) {
-        response = 'My day’s been chill. How’s yours going?';
-      } else if (lowerMessage.includes('what') && lowerMessage.includes('doing')) {
-        response = 'Just hanging out, chatting with you! What’s up with you?';
-      } else if (lowerMessage.includes('joke')) {
-        response = 'Here’s one: Why don’t scientists trust atoms? Because they make up everything!';
-      } else if (lowerMessage.includes('fact')) {
-        response = 'Did you know? A group of flamingos is called a flamboyance!';
-      } else if (lowerMessage.includes('music')) {
-        response = 'I love music! What kind of tunes are you into?';
-      } else if (lowerMessage.includes('movie')) {
-        response = 'Movies are great! Seen any good ones lately?';
-      } else if (lowerMessage.includes('game')) {
-        response = 'Gaming is fun! Do you have a favorite game or genre?';
-      } else if (lowerMessage.includes('food')) {
-        response = 'I’m a foodie! What’s your favorite dish?';
-      } else if (lowerMessage.includes('sports')) {
-        response = 'I enjoy sports too! What team or sport do you follow?';
-      } else if (lowerMessage.includes('travel')) {
-        response = 'Traveling is amazing! Where would you like to go next?';
-      } else if (lowerMessage.includes('book')) {
-        response = 'Books can be so inspiring. Any good reads lately?';
-      } else if (lowerMessage.includes('news')) {
-        response = "I try to keep up with the news. Anything in particular you're curious about?";
-      } else if (lowerMessage.includes('tech') || lowerMessage.includes('technology')) {
-        response = 'Technology is evolving fast! Are you into any gadgets or software?';
-      } else if (lowerMessage.includes('art')) {
-        response = 'Art is beautiful and expressive. Do you have a favorite artist or style?';
-      } else if (lowerMessage.includes('?')) {
-        response = 'Good question! I’d say… maybe. What do you think?';
-      } else {
-        response = 'Cool! Want to tell me more?';
-      }
+      response = analyzeMessage(userMessage, messages);
       nextState = 'general_chat';
     }
 
@@ -270,10 +289,10 @@ const App = () => {
   };
 
   const triggerFriendResponse = (userMessage) => {
-    const { response, nextState } = getResponse(userMessage, conversationState);
-    setConversationState(nextState);
     const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     setIsTyping(true);
+    const context = [...messages, { sender: 'Me', text: userMessage }];
+    const response = analyzeMessage(userMessage, context);
     setTimeout(() => {
       addMessage('Alice', response, timestamp);
       setIsTyping(false);
