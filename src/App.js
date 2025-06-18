@@ -206,6 +206,67 @@ const MessageInput = ({ addMessage, triggerFriendResponse }) => {
   );
 };
 
+const analyzeMessage = (message, history) => {
+  const doc = nlp(message);
+  const lower = message.toLowerCase();
+
+  // Entity recognition
+  if (doc.people().length) {
+    return `You mentioned ${doc.people().out('text')}. Are they important to you?`;
+  }
+  if (doc.places().length) {
+    return `I've heard of ${doc.places().out('text')}. Have you been there recently?`;
+  }
+  if (doc.dates().length) {
+    return `You mentioned a date: ${doc.dates().out('text')}. Is something special happening then?`;
+  }
+  if (doc.organizations().length) {
+    return `You mentioned ${doc.organizations().out('text')}. Do you work with them?`;
+  }
+  if (doc.numbers().length) {
+    return `You mentioned the number ${doc.numbers().out('text')}. Does it have any special meaning?`;
+  }
+
+  // Question detection
+  if (doc.has('#Question') || message.trim().endsWith('?')) {
+    return "That's a great question! What do you think?";
+  }
+
+  // Sentiment cues
+  if (doc.has('happy') || doc.has('excited') || doc.has('love')) {
+    return "I'm glad to hear that! What made you feel this way?";
+  }
+  if (doc.has('sad') || doc.has('angry') || doc.has('upset')) {
+    return "I'm sorry to hear that. Want to talk about it?";
+  }
+
+  // Topic extraction (noun detection)
+  const nouns = doc.nouns().out('array');
+  if (nouns.length) {
+    return `Let's talk about ${nouns[0]}. What interests you about it?`;
+  }
+
+  // Pattern matching (custom intent)
+  if (doc.match('tell me a joke').found) {
+    return "Why don't scientists trust atoms? Because they make up everything!";
+  }
+  if (doc.match('fun fact').found) {
+    return "Did you know? Octopuses have three hearts!";
+  }
+
+  // Keyword-based responses from trainingData
+  for (const data of trainingData) {
+    for (const keyword of data.keywords) {
+      if (lower.includes(keyword)) {
+        return data.response;
+      }
+    }
+  }
+
+  // Fallback
+  return "I'm here to chat about anything! Tell me more or ask me something specific.";
+};
+
 const App = () => {
   const initialMessages = [
     { id: 1, sender: 'Alice', text: "Hi, I'm Alice! I'm here to chat and help. How are you feeling today?", timestamp: '10:00 AM' }
@@ -220,65 +281,19 @@ const App = () => {
     setMessages(prev => [...prev, { id: Date.now(), sender, text, timestamp }]);
   };
 
-<<<<<<< HEAD
-  const analyzeMessage = (message, history) => {
-    const doc = nlp(message);
-    const lower = message.toLowerCase();
-
-    // Entity recognition
-    if (doc.people().length) {
-      return `You mentioned ${doc.people().out('text')}. Are they important to you?`;
-    }
-    if (doc.places().length) {
-      return `I've heard of ${doc.places().out('text')}. Have you been there recently?`;
-    }
-    if (doc.dates().length) {
-      return `You mentioned a date: ${doc.dates().out('text')}. Is something special happening then?`;
-    }
-    if (doc.organizations().length) {
-      return `You mentioned ${doc.organizations().out('text')}. Do you work with them?`;
-    }
-    if (doc.numbers().length) {
-      return `You mentioned the number ${doc.numbers().out('text')}. Does it have any special meaning?`;
-    }
-
-    // Question detection
-    if (doc.has('#Question') || message.trim().endsWith('?')) {
-      return "That's a great question! What do you think?";
-    }
-
-    // Sentiment cues
-    if (doc.has('happy') || doc.has('excited') || doc.has('love')) {
-      return "I'm glad to hear that! What made you feel this way?";
-    }
-    if (doc.has('sad') || doc.has('angry') || doc.has('upset')) {
-      return "I'm sorry to hear that. Want to talk about it?";
-    }
-
-    // Topic extraction (noun detection)
-    const nouns = doc.nouns().out('array');
-    if (nouns.length) {
-      return `Let's talk about ${nouns[0]}. What interests you about it?`;
-    }
-
-    // Pattern matching (custom intent)
-    if (doc.match('tell me a joke').found) {
-      return "Why don't scientists trust atoms? Because they make up everything!";
-    }
-    if (doc.match('fun fact').found) {
-      return "Did you know? Octopuses have three hearts!";
-    }
-
-    // Fallback
-    return "I'm here to chat about anything! Tell me more or ask me something specific.";
-  };
-
-=======
->>>>>>> 79647f6545e1cf05620bafb70fabc1b7132859a8
   const getResponse = (userMessage, currentState) => {
     const lowerMessage = userMessage.toLowerCase();
     let response = '';
     let nextState = currentState;
+
+    // Keyword-based responses from trainingData
+    for (const data of trainingData) {
+      for (const keyword of data.keywords) {
+        if (lowerMessage.includes(keyword)) {
+          return data.response;
+        }
+      }
+    }
 
     if (currentState === 'greeting') {
       response = analyzeMessage(userMessage, messages);
