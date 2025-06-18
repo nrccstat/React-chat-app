@@ -1,9 +1,15 @@
+<<<<<<< HEAD
 Below is an in-depth README file for your React-based chat application, providing a comprehensive overview, setup instructions, usage details, and additional information to help users understand, run, and contribute to the project.
-
----
+=======
+>>>>>>> 79647f6545e1cf05620bafb70fabc1b7132859a8
 
 # React Chat App
 
+<<<<<<< HEAD
+# React Chat App
+
+=======
+>>>>>>> 79647f6545e1cf05620bafb70fabc1b7132859a8
 **React Chat App** is a frontend-only React application that simulates a chat interface using HTML, CSS (via `styled-components`), and JavaScript. The app allows users to interact with a virtual assistant named Alice, who responds intelligently to user messages based on predefined rules. It features a responsive design, conversation history, a typing indicator, and a sleek, modern UI tailored for both desktop and mobile users. Messages are displayed in a chat window with timestamps, and the app maintains a conversational flow by tracking the dialogue state.
 
 ## Table of Contents
@@ -183,6 +189,7 @@ Please follow React best practices, use ESLint for code consistency, and include
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ## Contact
+<<<<<<< HEAD
 For questions or support, please contact [Your Name] at [your.email@example.com] or open an issue on the repository.
 
 ---
@@ -194,3 +201,11 @@ For questions or support, please contact [Your Name] at [your.email@example.com]
 - **Enhancements**: The future enhancements section provides ideas to expand the app, aligning with common React project improvements.
 
 Let me know if you’d like to refine any section or add more details!
+=======
+For questions or support, please contact Narasimha at [naci@ad.unc.edu] or open an issue on the repository.
+
+---
+
+
+
+>>>>>>> 79647f6545e1cf05620bafb70fabc1b7132859a8

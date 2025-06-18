@@ -220,6 +220,7 @@ const App = () => {
     setMessages(prev => [...prev, { id: Date.now(), sender, text, timestamp }]);
   };
 
+<<<<<<< HEAD
   const analyzeMessage = (message, history) => {
     const doc = nlp(message);
     const lower = message.toLowerCase();
@@ -272,6 +273,8 @@ const App = () => {
     return "I'm here to chat about anything! Tell me more or ask me something specific.";
   };
 
+=======
+>>>>>>> 79647f6545e1cf05620bafb70fabc1b7132859a8
   const getResponse = (userMessage, currentState) => {
     const lowerMessage = userMessage.toLowerCase();
     let response = '';
